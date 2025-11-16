@@ -10,7 +10,6 @@ import com.ldl.springboottest.repository.OrdersRepository;
 import com.ldl.springboottest.repository.UserRepository;
 import com.ldl.springboottest.repository.User_AddressRepository;
 import com.ldl.springboottest.utils.TokenUtil;
-import com.ldl.springboottest.utils.PasswordEncoderUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -35,15 +34,17 @@ public class UserHandler {
     private User_AddressRepository user_addressRepository;
     @Autowired
     private Order_DetailRepository order_detailRepository;
-    @Autowired
-    private PasswordEncoderUtil passwordEncoderUtil;
     @PostMapping("/login")
     public String login(@RequestBody User user){
         System.out.println(user);
         List<User> users = userRepository.findByunumber(user.getUnumber());
+//        String string = DigestUtils.md5DigestAsHex(user.getUpassword().getBytes());
         boolean flag=false;
         for(int i=0;i<users.size();i++){
-            if (passwordEncoderUtil.matches(user.getUpassword(), users.get(i).getUpassword())){
+//            if (string.equals(DigestUtils.md5DigestAsHex(users.get(i).getUpassword().getBytes()))){
+//                flag=true;
+//            }
+            if (user.getUpassword().equals(users.get(i).getUpassword())){
                 flag=true;
             }
         }
@@ -127,7 +128,7 @@ public class UserHandler {
 
     @PostMapping("/save")
     public String save(@RequestBody User user){
-        user.setUpassword(passwordEncoderUtil.encodePassword(user.getUpassword()));
+        user.setUpassword(DigestUtils.md5DigestAsHex(user.getUpassword().getBytes()));
         User user1 = userRepository.save(user);
         User_Address user_address = new User_Address();
         user_address.setUserunumber(user.getUnumber());
