@@ -12,9 +12,12 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQL8Dialect
+<<<<<<< HEAD
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 10MB
+=======
+>>>>>>> 54bb676375ad737ee7c25e65f5821a9cc53f8603
 server:
   port: 8181
