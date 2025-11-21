@@ -11,3 +11,10 @@ spring:
         format_sql: true
 server:
   port: 8181
+
+# AI试衣服务配置
+ai:
+  tryon:
+    api:
+      url: http://localhost:8000/ai/tryon
+      key: your_api_key_here

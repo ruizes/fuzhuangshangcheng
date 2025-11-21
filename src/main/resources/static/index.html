@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服装商城 - 智能客服与AI试衣</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .tab-btn {
+            padding: 10px 20px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        
+        .tab-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .tab-btn.active {
+            background-color: #0056b3;
+        }
+        
+        .tab-content {
+            display: none;
+            background-color: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* 智能客服样式 */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 500px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 70%;
+        }
+        
+        .user-message {
+            background-color: #007bff;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background-color: #f8f9fa;
+            color: #333;
+            align-self: flex-start;
+        }
+        
+        .chat-input-container {
+            display: flex;
+        }
+        
+        #chat-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px 0 0 5px;
+            font-size: 16px;
+        }
+        
+        #send-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 0 5px 5px 0;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #send-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        /* AI试衣样式 */
+        .try-on-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="file"] {
+            padding: 3px;
+        }
+        
+        #submit-try-on {
+            grid-column: 1 / -1;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        #submit-try-on:hover {
+            background-color: #1e7e34;
+        }
+        
+        .try-on-result {
+            margin-top: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .try-on-result.active {
+            display: block;
+        }
+        
+        #try-on-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .evaluation {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        
+        .evaluation h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .score {
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .score-bar {
+            width: 70%;
+            height: 10px;
+            background-color: #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .score-fill {
+            height: 100%;
+            background-color: #28a745;
+        }
+        
+        .suggestions {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .try-on-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .message {
+                max-width: 90%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>服装商城 - 智能客服与AI试衣</h1>
+        
+        <div class="tabs">
+            <button class="tab-btn active" onclick="showTab('chat')">智能客服</button>
+            <button class="tab-btn" onclick="showTab('try-on')">AI试衣</button>
+        </div>
+        
+        <!-- 智能客服内容 -->
+        <div id="chat" class="tab-content active">
+            <div class="chat-container">
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message bot-message">
+                        您好！欢迎来到服装商城智能客服。我可以为您解答关于商品、订单、退换货等方面的问题。
+                    </div>
+                </div>
+                <div class="chat-input-container">
+                    <input type="text" id="chat-input" placeholder="请输入您的问题...">
+                    <button id="send-btn">发送</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- AI试衣内容 -->
+        <div id="try-on" class="tab-content">
+            <h2>AI试衣</h2>
+            <form class="try-on-form" id="try-on-form">
+                <div class="form-group">
+                    <label for="user-id">用户ID</label>
+                    <input type="number" id="user-id" name="userId" required>
+                </div>
+                <div class="form-group">
+                    <label for="clothing-id">服装ID</label>
+                    <input type="number" id="clothing-id" name="clothingId" required>
+                </div>
+                <div class="form-group">
+                    <label for="height">身高(cm)</label>
+                    <input type="number" id="height" name="height" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="weight">体重(kg)</label>
+                    <input type="number" id="weight" name="weight" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="gender">性别</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">请选择</option>
+                        <option value="male">男</option>
+                        <option value="female">女</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="bust">胸围(cm)</label>
+                    <input type="number" id="bust" name="bust" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="waist">腰围(cm)</label>
+                    <input type="number" id="waist" name="waist" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="hips">臀围(cm)</label>
+                    <input type="number" id="hips" name="hips" step="0.1" required>
+                </div>
+                <div class="form-group">
+                    <label for="skin-color">肤色</label>
+                    <select id="skin-color" name="skinColor" required>
+                        <option value="">请选择</option>
+                        <option value="fair">白皙</option>
+                        <option value="light">浅黄</option>
+                        <option value="medium">中等</option>
+                        <option value="dark">偏深</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="face-image">人脸图片</label>
+                    <input type="file" id="face-image" name="faceImage" accept="image/*" required>
+                </div>
+                <button type="submit" id="submit-try-on">提交试衣请求</button>
+            </form>
+            
+            <div class="try-on-result" id="try-on-result">
+                <h2>试衣结果</h2>
+                <img id="try-on-image" src="" alt="试衣图">
+                <div class="evaluation">
+                    <h3>客观评价</h3>
+                    <div class="score">
+                        <span>合身度:</span>
+                        <div class="score-bar">
+                            <div class="score-fill" id="fit-score" style="width: 0%"></div>
+                        </div>
+                        <span id="fit-score-text">0%</span>
+                    </div>
+                    <div class="score">
+                        <span>风格匹配度:</span>
+                        <div class="score-bar">
+                            <div class="score-fill" id="style-score" style="width: 0%"></div>
+                        </div>
+                        <span id="style-score-text">0%</span>
+                    </div>
+                    <div class="score">
+                        <span>颜色匹配度:</span>
+                        <div class="score-bar">
+                            <div class="score-fill" id="color-score" style="width: 0%"></div>
+                        </div>
+                        <span id="color-score-text">0%</span>
+                    </div>
+                    <div class="suggestions">
+                        <h4>建议:</h4>
+                        <p id="suggestions-text"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // 切换标签页
+        function showTab(tabName) {
+            const tabContents = document.querySelectorAll('.tab-content');
+            const tabBtns = document.querySelectorAll('.tab-btn');
+            
+            tabContents.forEach(content => content.classList.remove('active'));
+            tabBtns.forEach(btn => btn.classList.remove('active'));
+            
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // 智能客服功能
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // 添加用户消息到聊天记录
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // 发送请求到后端
+            fetch('/api/chat/send', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ message: message })
+            })
+            .then(response => response.text())
+            .then(data => {
+                // 添加机器人回复到聊天记录
+                addMessage(data, 'bot');
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                addMessage('抱歉，服务器出现错误，请稍后重试。', 'bot');
+            });
+        }
+        
+        function addMessage(message, type) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}-message`;
+            messageDiv.textContent = message;
+            chatMessages.appendChild(messageDiv);
+            
+            // 滚动到底部
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // AI试衣功能
+        document.getElementById('try-on-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const submitBtn = document.getElementById('submit-try-on');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.textContent = '处理中...';
+            submitBtn.disabled = true;
+            
+            fetch('/api/try-on/submit', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                displayTryOnResult(data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('抱歉，服务器出现错误，请稍后重试。');
+            })
+            .finally(() => {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            });
+        });
+        
+        function displayTryOnResult(result) {
+            const tryOnResult = document.getElementById('try-on-result');
+            const tryOnImage = document.getElementById('try-on-image');
+            const fitScore = document.getElementById('fit-score');
+            const fitScoreText = document.getElementById('fit-score-text');
+            const styleScore = document.getElementById('style-score');
+            const styleScoreText = document.getElementById('style-score-text');
+            const colorScore = document.getElementById('color-score');
+            const colorScoreText = document.getElementById('color-score-text');
+            const suggestionsText = document.getElementById('suggestions-text');
+            
+            if (result.status === 'success') {
+                tryOnImage.src = result.try_on_image;
+                
+                // 设置评分
+                const fitPercentage = Math.round(result.evaluation.fit_score);
+                fitScore.style.width = fitPercentage + '%';
+                fitScoreText.textContent = fitPercentage + '%';
+                
+                const stylePercentage = Math.round(result.evaluation.style_match);
+                styleScore.style.width = stylePercentage + '%';
+                styleScoreText.textContent = stylePercentage + '%';
+                
+                const colorPercentage = Math.round(result.evaluation.color_match);
+                colorScore.style.width = colorPercentage + '%';
+                colorScoreText.textContent = colorPercentage + '%';
+                
+                suggestionsText.textContent = result.evaluation.suggestions;
+                
+                tryOnResult.classList.add('active');
+                tryOnResult.scrollIntoView({ behavior: 'smooth' });
+            } else {
+                alert('试衣失败: ' + result.evaluation.suggestions);
+            }
+        }
+    </script>
+</body>
+</html>
